@@ -1,22 +1,49 @@
 import React from 'react';
-import { Layer, Stage } from 'react-konva';
+import { Layer, Stage, useStrictMode } from 'react-konva';
 import { Simulation } from './Simulation';
 import { Row, Col } from 'antd';
 
-function App() {
-  return (
-    <Col span={22}>
-      <Row gutter={16}>
-        <Col span={16}>
-          <Stage width={700} height={700}>
-            <Layer>
-              <Simulation />
-            </Layer>
-          </Stage>
-        </Col>
-      </Row>
-    </Col>
-  );
+
+useStrictMode(true);
+
+class App extends React.Component {
+
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      width: 700,
+      height: window.innerHeight - 50,
+      x: 0,
+      y: 0,
+    }
+  }
+
+  componentDidMount() {
+    this.setState({
+      width: this.node.clientWidth,
+      x: this.node.offsetLeft,
+      y: this.node.offsetTop
+    })
+  }
+
+  render() {
+    return (
+      <Col span={22}>
+        <Row gutter={16} style={{marginTop: '10px'}}>
+          <Col span={16}>
+            <div width='100%' ref={node => this.node = node}>
+              <Stage {...this.state}>
+                <Layer>
+                  <Simulation {...this.state}/>
+                </Layer>
+              </Stage>
+            </div>
+          </Col>
+        </Row>
+      </Col>
+    );
+  }
 }
 
 export default App;
