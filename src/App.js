@@ -4,8 +4,14 @@ import { Simulation } from './Simulation';
 import { Row, Col } from 'antd';
 
 
-useStrictMode(true);
+useStrictMode(false);
 
+/**
+ *
+ *
+ * @class App
+ * @extends {React.Component}
+ */
 class App extends React.Component {
 
   constructor(props) {

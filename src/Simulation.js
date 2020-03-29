@@ -20,7 +20,8 @@ class Simulation extends Component {
             ],
             offset: 10,
             radius: 4,
-            ...props
+            ...props,
+            contProb: 0.2
         }
     }
 
@@ -62,28 +63,51 @@ class Simulation extends Component {
 
     updatePositions = () => {
         /* Limits */
-        const {x0, x1, y0, y1} = this.getLimits();
+        const limits = this.getLimits();
 
         /* Create new particles based on previous position */
         const particles = this.state.particles.map(part => {
-            if (!this.isInLimit(part.x, x0 + part.radius, x1 - part.radius)) {
-                part.speedX *= -1
+            this.updatePosition(part, limits);
+            if (part.health === 'infected') {
+                this.infectParticles(part, this.state.particles);
             }
-            if (!this.isInLimit(part.y, y0 + part.radius, y1 - part.radius)) {
-                part.speedY *= -1
-            }
-
-            part.x += part.speedX;
-            part.y += part.speedY;
             return {...part};
         })
+
 
         this.setState({particles});
     }
 
+    infectParticles = (part, otherParticles) => {
+        otherParticles.forEach(p => {
+            const dist = this.dist(part, p);
+            if (dist < part.radius && Math.random() < this.state.contProb) {
+                p.health = 'infected'
+            }
+        })
+    }
+
+    dist = (p1, p2) => {
+        const a = Math.pow(p1.x - p2.x, 2)
+        const b = Math.pow(p1.y - p2.y, 2)
+        return Math.sqrt(a + b)
+    }
+
+    updatePosition = (part, {x0, x1, y0, y1}) => {
+        if (!this.isInLimit(part.x, x0 + part.radius, x1 - part.radius)) {
+            part.speedX *= -1
+        }
+        if (!this.isInLimit(part.y, y0 + part.radius, y1 - part.radius)) {
+            part.speedY *= -1
+        }
+
+        part.x += part.speedX;
+        part.y += part.speedY;
+    }
+
     componentDidMount() {
         this.createParticles()
-        this.interval = setInterval(this.updatePositions, 10);
+        this.interval = setInterval(this.updatePositions, 30);
     }
 
     componentDidUpdate(prevProps) {
