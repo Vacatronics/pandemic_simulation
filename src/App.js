@@ -2,6 +2,7 @@ import React from 'react';
 import { Layer, Stage, useStrictMode } from 'react-konva';
 import { Simulation } from './Simulation';
 import { Row, Col } from 'antd';
+import { Settings } from './Settings';
 
 
 useStrictMode(false);
@@ -22,6 +23,7 @@ class App extends React.Component {
       height: window.innerHeight - 50,
       x: 0,
       y: 0,
+      number: 10,
     }
   }
 
@@ -33,15 +35,22 @@ class App extends React.Component {
     })
   }
 
+  onFormSubmitted = (values) => {
+    this.setState({...values});
+  }
+
   render() {
     return (
       <Col span={22}>
-        <Row gutter={16} style={{marginTop: '10px'}}>
+        <Row gutter={16} style={{ marginTop: '10px' }}>
+          <Col span={6}>
+            <Settings {...this.state} onFinished={this.onFormSubmitted}/>
+          </Col>
           <Col span={16}>
             <div width='100%' ref={node => this.node = node}>
               <Stage {...this.state}>
                 <Layer>
-                  <Simulation {...this.state}/>
+                  <Simulation {...this.state} />
                 </Layer>
               </Stage>
             </div>
