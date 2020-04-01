@@ -1,8 +1,8 @@
 import React from 'react';
-import { Layer, Stage, useStrictMode } from 'react-konva';
+import { useStrictMode } from 'react-konva';
 import { Simulation } from './Simulation';
-import { Row, Col } from 'antd';
 import { Settings } from './Settings';
+import { Row, Col } from 'antd';
 
 
 useStrictMode(false);
@@ -19,41 +19,45 @@ class App extends React.Component {
     super(props);
 
     this.state = {
-      width: 700,
-      height: window.innerHeight - 50,
-      x: 0,
-      y: 0,
-      number: 10,
+      settings: {
+        number: 10,
+        infectionRadius: 4,
+        infectionProb: 20,
+        infectionLethality: 3,
+        speed: 1.0
+      },
+      running: false
     }
   }
 
-  componentDidMount() {
-    this.setState({
-      width: this.node.clientWidth,
-      x: this.node.offsetLeft,
-      y: this.node.offsetTop
-    })
+  onFormSubmitted = (values) => {
+    this.setState({running: false, settings: {...values}});
+    setTimeout(() => {
+      this.setState({running: true})
+    }, 100);
   }
 
-  onFormSubmitted = (values) => {
-    this.setState({...values});
+  onPlay = (running, values) => {
+    if (values !== null) {
+      this.setState({running: running, settings: {...values}})
+    } else {
+      this.setState({running})
+    }
   }
 
   render() {
     return (
       <Col span={22}>
-        <Row gutter={16} style={{ marginTop: '10px' }}>
+        <Row gutter={16} style={{ marginTop: '50px' }}>
           <Col span={6}>
-            <Settings {...this.state} onFinished={this.onFormSubmitted}/>
+            <Settings 
+              {...this.state} 
+              onFinished={this.onFormSubmitted} 
+              onPlay={this.onPlay}
+            />
           </Col>
           <Col span={16}>
-            <div width='100%' ref={node => this.node = node}>
-              <Stage {...this.state}>
-                <Layer>
-                  <Simulation {...this.state} />
-                </Layer>
-              </Stage>
-            </div>
+            <Simulation {...this.state} />
           </Col>
         </Row>
       </Col>

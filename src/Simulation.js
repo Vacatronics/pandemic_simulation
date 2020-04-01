@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
-import { Rect, Group } from 'react-konva';
+import { Rect, Group, Stage, Layer } from 'react-konva';
 import { Particle } from './Particle';
+import { Button, Empty } from 'antd';
+import { PlayCircleOutlined } from '@ant-design/icons'
 
 
 /**
@@ -20,17 +22,18 @@ class Simulation extends Component {
       ],
       offset: 10,
       radius: 4,
-      ...props,
-      contProb: 0.2,
-      number: 10
+      width: 700,
+      height: window.innerHeight - 100,
+      x: 0,
+      y: 0,
     }
   }
 
-  getLimits = (state = this.state) => {
-    const x0 = state.x + this.state.offset
-    const x1 = state.width - 2 * this.state.offset
-    const y0 = state.y + this.state.offset
-    const y1 = state.height - 2 * this.state.offset
+  getLimits = () => {
+    const x0 = this.state.x + this.state.offset
+    const x1 = this.state.width - 2 * this.state.offset
+    const y0 = this.state.y + this.state.offset
+    const y1 = this.state.height - 2 * this.state.offset
     return { x0, x1, y0, y1 }
   }
 
@@ -41,21 +44,22 @@ class Simulation extends Component {
     return (end - start) * Math.random() + start;
   }
 
-  createParticles = (state) => {
-    const { x0, x1, y0, y1 } = this.getLimits(state);
+  createParticles = () => {
+    const { x0, x1, y0, y1 } = this.getLimits();
+    const { settings } = this.props;
     const { radius } = this.state;
-    const particles = Array.from({ length: state.number }).map((_, i) => (
+    const particles = Array.from({ length: settings.number }).map((_, i) => (
       {
         x: this.randomRange(x0 + 2 * radius, x1 - 2 * radius),
         y: this.randomRange(y0 + 2 * radius, y1 - 2 * radius),
         radius: radius,
         health: i === 0 ? 'infected' : 'normal',
-        speedX: this.randomRange(-1, 1),
-        speedY: this.randomRange(-1, 1)
+        speedX: this.randomRange(settings.speed * (-1), settings.speed),
+        speedY: this.randomRange(settings.speed * (-1), settings.speed)
       }
     ))
 
-    this.setState({ particles, ...state })
+    this.setState({ particles, settings })
   }
 
   isInLimit = (x, x0, x1) => {
@@ -80,9 +84,12 @@ class Simulation extends Component {
   }
 
   infectParticles = (part, otherParticles) => {
+    const {infectionProb, infectionRadius} = this.props.settings;
+    const infectionRatio = infectionProb / 100.0;
+
     otherParticles.forEach(p => {
       const dist = this.dist(part, p);
-      if (dist < part.radius && Math.random() < this.state.contProb) {
+      if (dist < infectionRadius * 2 && Math.random() < infectionRatio) {
         p.health = 'infected'
       }
     })
@@ -106,11 +113,25 @@ class Simulation extends Component {
     part.y += part.speedY;
   }
 
+  componentDidMount() {
+    this.setState({
+      width: this.node.clientWidth,
+      x: this.node.offsetLeft,
+      y: this.node.offsetTop
+    })
+  }
+
   componentDidUpdate(prevProps) {
-    if (JSON.stringify(prevProps) !== JSON.stringify(this.props)) {
-      const newState = {...this.props};
-      this.createParticles(newState)
-      this.interval = setInterval(this.updatePositions, 30);
+    if (prevProps.running !== this.props.running) {
+      if (this.props.running) {
+        this.createParticles();
+        const {number} = this.props.settings;
+        const delay = number > 500 ? 100 : 30;
+        this.interval = setInterval(this.updatePositions, delay);
+      } else {
+        clearInterval(this.interval)
+        this.setState({particles: []})
+      }
     }
   }
 
@@ -120,23 +141,52 @@ class Simulation extends Component {
 
   render() {
     const { x0, x1, y0, y1 } = this.getLimits();
+    const {width, height, x, y} = this.state;
 
     return (
-      <Group>
-        <Rect
-          width={x1 - x0}
-          height={y1 - y0}
-          stroke='white'
-          strokeWidth={1}
-          x={x0}
-          y={y0}
-        />
+      <div width='100%' ref={node => this.node = node}>
         {
-          this.state.particles.map((el, i) => {
-            return (<Particle {...el} key={i} />)
-          })
+          this.props.running ? (
+            <Stage 
+              width={width}
+              height={height}
+              x={x}
+              y={y}
+            >
+              <Layer>
+                <Group>
+                  <Rect
+                    width={x1 - x0}
+                    height={y1 - y0}
+                    stroke='white'
+                    strokeWidth={1}
+                    x={x0}
+                    y={y0}
+                  />
+                  {
+                    this.state.particles.map((el, i) => {
+                      return (<Particle {...el} key={i} />)
+                    })
+                  }
+                </Group>
+              </Layer>
+            </Stage>
+          ) : (
+              <Empty
+                description={(
+                  <div>
+                    Simulação parada. <br />
+                    Aperte play para iniciar
+                  </div>
+                )}
+              >
+                <Button type='primary' icon={<PlayCircleOutlined />}>Play</Button>
+              </Empty>
+            )
         }
-      </Group>
+
+
+      </div>
     )
   }
 }

@@ -14,7 +14,7 @@ const Particle = (props) => {
     }
     let color = colors[props.health] || 'gray';
     return (
-        <Circle {...props} strokeWidth={1} stroke={color}/>
+      <Circle {...props} strokeWidth={1} stroke={color}/>
     )
 }
 
