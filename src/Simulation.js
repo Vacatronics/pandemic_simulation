@@ -1,8 +1,7 @@
 import React, { Component } from 'react';
 import { Rect, Group, Stage, Layer } from 'react-konva';
 import { Particle } from './Particle';
-import { Button, Empty } from 'antd';
-import { PlayCircleOutlined } from '@ant-design/icons'
+import { Empty } from 'antd';
 
 
 /**
@@ -17,9 +16,7 @@ class Simulation extends Component {
 
     this.state = {
       color: 'green',
-      particles: [
-        {}
-      ],
+      particles: [],
       offset: 10,
       radius: 4,
       width: 700,
@@ -123,14 +120,17 @@ class Simulation extends Component {
 
   componentDidUpdate(prevProps) {
     if (prevProps.running !== this.props.running) {
-      if (this.props.running) {
+      if (JSON.stringify(prevProps.settings) !== JSON.stringify(this.props.settings)
+          || this.state.particles.length === 0) {
         this.createParticles();
+      }
+      if (this.props.running) {
         const {number} = this.props.settings;
         const delay = number > 500 ? 100 : 30;
         this.interval = setInterval(this.updatePositions, delay);
       } else {
         clearInterval(this.interval)
-        this.setState({particles: []})
+        //this.setState({particles: []})
       }
     }
   }
@@ -146,7 +146,7 @@ class Simulation extends Component {
     return (
       <div width='100%' ref={node => this.node = node}>
         {
-          this.props.running ? (
+          this.state.particles.length > 0 ? (
             <Stage 
               width={width}
               height={height}
@@ -179,8 +179,8 @@ class Simulation extends Component {
                     Aperte play para iniciar
                   </div>
                 )}
+                style={{marginTop: '10%'}}
               >
-                <Button type='primary' icon={<PlayCircleOutlined />}>Play</Button>
               </Empty>
             )
         }

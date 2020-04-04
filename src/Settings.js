@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { Card, Form, InputNumber, Button, Slider } from 'antd'
-import { PlayCircleOutlined, PauseCircleFilled, ReloadOutlined } from '@ant-design/icons'
+import { PlayCircleOutlined, PauseCircleFilled } from '@ant-design/icons'
 
 
 /**
@@ -18,7 +18,6 @@ class Settings extends Component {
       <Card title='Configurações'>
         <Form 
           initialValues={this.props.settings}
-          onFinish={this.props.onFinished}
           layout={'horizontal'}
           wrapperCol={{span: 12}}
           labelCol={{span: 10}}
@@ -46,9 +45,6 @@ class Settings extends Component {
           </Form.Item>
 
           <Form.Item wrapperCol={{span: 24}}>
-            <Button type='default' htmlType='submit' icon={<ReloadOutlined />} style={{marginRight: '10px'}}>
-              Reiniciar
-            </Button>
             {
               this.props.running ? (
                 <Button type='primary' icon={<PauseCircleFilled />} onClick={() => this.props.onPlay(false, null)}>

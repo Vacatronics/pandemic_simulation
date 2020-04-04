@@ -2,7 +2,7 @@ import React from 'react';
 import { useStrictMode } from 'react-konva';
 import { Simulation } from './Simulation';
 import { Settings } from './Settings';
-import { Row, Col } from 'antd';
+import { Row, Col, Typography } from 'antd';
 
 
 useStrictMode(false);
@@ -48,7 +48,12 @@ class App extends React.Component {
   render() {
     return (
       <Col span={22}>
-        <Row gutter={16} style={{ marginTop: '50px' }}>
+        <Row style={{ margin: '10px' }}>
+          <Typography.Title level={1}>
+            Simulação Pandemia
+            </Typography.Title>
+        </Row>
+        <Row gutter={16} style={{ marginTop: '40px' }}>
           <Col span={6}>
             <Settings 
               {...this.state} 
