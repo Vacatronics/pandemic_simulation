@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Rect, Group, Stage, Layer } from 'react-konva';
 import { Particle } from './Particle';
 import { Empty } from 'antd';
+import { ParticleHelper } from '../_helpers/';
 
 
 /**
@@ -20,17 +21,17 @@ class Simulation extends Component {
       offset: 10,
       radius: 4,
       width: 700,
-      height: window.innerHeight - 100,
+      height: window.innerHeight - 150,
       x: 0,
       y: 0,
     }
   }
 
   getLimits = () => {
-    const x0 = this.state.x + this.state.offset
-    const x1 = this.state.width - 2 * this.state.offset
-    const y0 = this.state.y + this.state.offset
-    const y1 = this.state.height - 2 * this.state.offset
+    const x0 = this.state.x
+    const x1 = this.state.width
+    const y0 = this.state.y
+    const y1 = this.state.height
     return { x0, x1, y0, y1 }
   }
 
@@ -45,22 +46,20 @@ class Simulation extends Component {
     const { x0, x1, y0, y1 } = this.getLimits();
     const { settings } = this.props;
     const { radius } = this.state;
-    const particles = Array.from({ length: settings.number }).map((_, i) => (
-      {
-        x: this.randomRange(x0 + 2 * radius, x1 - 2 * radius),
-        y: this.randomRange(y0 + 2 * radius, y1 - 2 * radius),
-        radius: radius,
-        health: i === 0 ? 'infected' : 'normal',
-        speedX: this.randomRange(settings.speed * (-1), settings.speed),
-        speedY: this.randomRange(settings.speed * (-1), settings.speed)
+    const particles = Array.from({ length: settings.number }).map((_, i) => {
+        const p = {
+          x: this.randomRange(x0 + 2 * radius, x1 - 2 * radius),
+          y: this.randomRange(y0 + 2 * radius, y1 - 2 * radius),
+          radius: radius,
+          health: i === 0 ? 'infected' : 'normal',
+          speedX: this.randomRange(settings.speed * (-1), settings.speed),
+          speedY: this.randomRange(settings.speed * (-1), settings.speed)
+        }
+        return new ParticleHelper(p)
       }
-    ))
+    )
 
     this.setState({ particles, settings })
-  }
-
-  isInLimit = (x, x0, x1) => {
-    return (x0 < x) && (x < x1)
   }
 
   updatePositions = () => {
@@ -68,53 +67,31 @@ class Simulation extends Component {
     const limits = this.getLimits();
 
     /* Create new particles based on previous position */
-    const particles = this.state.particles.map(part => {
-      this.updatePosition(part, limits);
+    this.state.particles.forEach(part => {
+      part.updatePosition(limits);
       if (part.health === 'infected') {
         this.infectParticles(part, this.state.particles);
       }
-      return { ...part };
     })
 
-
-    this.setState({ particles });
+    this.forceUpdate();
   }
 
   infectParticles = (part, otherParticles) => {
     const {infectionProb, infectionRadius} = this.props.settings;
-    const infectionRatio = infectionProb / 100.0;
-
-    otherParticles.forEach(p => {
-      const dist = this.dist(part, p);
-      if (dist < infectionRadius * 2 && Math.random() < infectionRatio) {
-        p.health = 'infected'
-      }
-    })
-  }
-
-  dist = (p1, p2) => {
-    const a = Math.pow(p1.x - p2.x, 2)
-    const b = Math.pow(p1.y - p2.y, 2)
-    return Math.sqrt(a + b)
-  }
-
-  updatePosition = (part, { x0, x1, y0, y1 }) => {
-    if (!this.isInLimit(part.x, x0 + part.radius, x1 - part.radius)) {
-      part.speedX *= -1
-    }
-    if (!this.isInLimit(part.y, y0 + part.radius, y1 - part.radius)) {
-      part.speedY *= -1
+    const settings = {
+      probability: infectionProb / 100.0,
+      radius: infectionRadius
     }
 
-    part.x += part.speedX;
-    part.y += part.speedY;
+    otherParticles.forEach(p => part.tryInfectAnother(p, settings));
   }
 
   componentDidMount() {
     this.setState({
       width: this.node.clientWidth,
-      x: this.node.offsetLeft,
-      y: this.node.offsetTop
+      x: 0,
+      y: 0
     })
   }
 
@@ -140,8 +117,7 @@ class Simulation extends Component {
   }
 
   render() {
-    const { x0, x1, y0, y1 } = this.getLimits();
-    const {width, height, x, y} = this.state;
+    const {width, height} = this.state;
 
     return (
       <div width='100%' ref={node => this.node = node}>
@@ -150,18 +126,18 @@ class Simulation extends Component {
             <Stage 
               width={width}
               height={height}
-              x={x}
-              y={y}
+              x={0}
+              y={0}
             >
               <Layer>
                 <Group>
                   <Rect
-                    width={x1 - x0}
-                    height={y1 - y0}
+                    width={width}
+                    height={height}
                     stroke='white'
                     strokeWidth={1}
-                    x={x0}
-                    y={y0}
+                    x={0}
+                    y={0}
                   />
                   {
                     this.state.particles.map((el, i) => {
