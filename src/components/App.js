@@ -24,6 +24,7 @@ class App extends React.Component {
         infectionRadius: 4,
         infectionProb: 20,
         infectionLethality: 3,
+        infectionDays: 15,
         speed: 1.0
       },
       running: false

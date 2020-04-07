@@ -36,6 +36,10 @@ class Settings extends Component {
             <Slider step={0.1} marks={{0: '0%', 50: '50%', 100: '100%'}}/>
           </Form.Item>
 
+          <Form.Item label='Dias infectados' name='infectionDays'>
+            <Slider min={1} max={30} marks={{1: '1', 15: '15', 30: '30'}}/>
+          </Form.Item>
+
           <Form.Item label='Letalidade' name='infectionLethality'>
             <Slider step={0.1} marks={{0: '0%', 50: '50%', 100: '100%'}}/>
           </Form.Item>

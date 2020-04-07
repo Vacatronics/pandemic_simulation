@@ -7,7 +7,7 @@ import { Circle } from 'react-konva'
  */
 const Particle = (props) => {
     const colors = {
-        health: 'blue',
+        normal: 'blue',
         infected: 'red',
         recovered: 'gray',
         dead: 'yellow'

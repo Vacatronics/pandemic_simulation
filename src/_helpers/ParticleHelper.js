@@ -12,6 +12,8 @@ class ParticleHelper {
     this.health = props.health || 'normal';
     this.speedX = props.speedX || 0.1;
     this.speedY = props.speedY || 0.1;
+    this.startDayInfection = this.health === 'normal' ? -1 : 0;
+    this.endDayInfection = -1;
   }
 
   isInLimit = (x, x0, x1) => {
@@ -32,18 +34,29 @@ class ParticleHelper {
     this.y += this.speedY;
   }
 
-  tryInfectAnother(another, infectionSettings) {
+  updateHealth(day, infectionSettings) {
+    const { infectionDays } = infectionSettings;
+    if (this.health === 'infected' && infectionDays < (day - this.startDayInfection)) {
+      this.health = 'recovered'
+      this.endDayInfection = day
+    } 
+  }
+
+  tryInfectAnother(another, infectionSettings, day) {
     if (this.health === 'infected') {
       const dist = this.distanceTo(another);
       const {probability, radius} = infectionSettings;
       if (dist < radius * 2 && Math.random() < probability) {
-        another.infect();
+        another.infect(day);
       }
     }
   }
 
-  infect() {
-    this.health = 'infected'
+  infect(day) {
+    if (this.health === 'normal') {
+      this.health = 'infected'
+      this.startDayInfection = day
+    }
   }
 
   distanceTo(a) {

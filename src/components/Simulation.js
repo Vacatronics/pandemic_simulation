@@ -24,6 +24,8 @@ class Simulation extends Component {
       height: window.innerHeight - 150,
       x: 0,
       y: 0,
+      simulationDay: 0,
+      simulationStep: 0.01
     }
   }
 
@@ -72,9 +74,10 @@ class Simulation extends Component {
       if (part.health === 'infected') {
         this.infectParticles(part, this.state.particles);
       }
+      part.updateHealth(this.state.simulationDay, this.props.settings);
     })
 
-    this.forceUpdate();
+    this.setState({simulationDay: this.state.simulationDay + this.state.simulationStep});
   }
 
   infectParticles = (part, otherParticles) => {
@@ -84,7 +87,7 @@ class Simulation extends Component {
       radius: infectionRadius
     }
 
-    otherParticles.forEach(p => part.tryInfectAnother(p, settings));
+    otherParticles.forEach(p => part.tryInfectAnother(p, settings, this.state.simulationDay));
   }
 
   componentDidMount() {
@@ -104,6 +107,7 @@ class Simulation extends Component {
       if (this.props.running) {
         const {number} = this.props.settings;
         const delay = number > 500 ? 100 : 30;
+        this.setState({simulationDay: 0});
         this.interval = setInterval(this.updatePositions, delay);
       } else {
         clearInterval(this.interval)
