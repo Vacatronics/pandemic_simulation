@@ -1,3 +1,5 @@
+import { HEALTH, HEALTH_KEYS } from "./ParticleHealth";
+
 /**
  *
  *
@@ -14,6 +16,7 @@ class ParticleHelper {
     this.speedY = props.speedY || 0.1;
     this.startDayInfection = this.health === 'normal' ? -1 : 0;
     this.endDayInfection = -1;
+    this.contagious = props.contagious || false;
   }
 
   isInLimit = (x, x0, x1) => {
@@ -21,6 +24,10 @@ class ParticleHelper {
   }
 
   updatePosition(limits) {
+    if (this.health === 'dead') {
+      return;
+    }
+
     const {x0, y0, x1, y1} = limits;
 
     if (!this.isInLimit(this.x, x0 + this.radius, x1 - this.radius)) {
@@ -34,16 +41,29 @@ class ParticleHelper {
     this.y += this.speedY;
   }
 
+  isInfected() {
+    return this.health.includes('symptoms');
+  }
+
   updateHealth(day, infectionSettings) {
-    const { infectionDays } = infectionSettings;
-    if (this.health === 'infected' && infectionDays < (day - this.startDayInfection)) {
-      this.health = 'recovered'
-      this.endDayInfection = day
+    const { infectionDays, infectionLethality, infectionSymptomDays } = infectionSettings;
+    if (this.isInfected()) {
+      if (infectionDays < (day - this.startDayInfection)) {
+        this.health = 'immune'
+        this.endDayInfection = day
+        this.contagious = false
+      }
+      // } else if (Math.random() < (infectionLethality / 100.0)
+      //     && this.isInLimit(day, infectionSymptomDays[0], infectionSymptomDays[1])
+      // ) {
+      //   this.health = 'dead'
+      //   this.endDayInfection = day
+      // }
     } 
   }
 
   tryInfectAnother(another, infectionSettings, day) {
-    if (this.health === 'infected') {
+    if (this.contagious) {
       const dist = this.distanceTo(another);
       const {probability, radius} = infectionSettings;
       if (dist < radius * 2 && Math.random() < probability) {
@@ -54,7 +74,8 @@ class ParticleHelper {
 
   infect(day) {
     if (this.health === 'normal') {
-      this.health = 'infected'
+      this.health = 'symptoms_none';
+      this.contagious = true;
       this.startDayInfection = day
     }
   }

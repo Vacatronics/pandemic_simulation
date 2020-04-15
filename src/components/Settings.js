@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { Card, Form, InputNumber, Button, Slider } from 'antd'
-import { PlayCircleOutlined, PauseCircleFilled } from '@ant-design/icons'
+import { PlayCircleOutlined, PauseCircleFilled, ReloadOutlined } from '@ant-design/icons'
 
 
 /**
@@ -22,6 +22,7 @@ class Settings extends Component {
           wrapperCol={{span: 12}}
           labelCol={{span: 10}}
           style={{width: '100%'}}
+          onFinish={this.props.onFinished}
           ref={this.formRef}
         >
           <Form.Item label='Número' name='number'>
@@ -40,6 +41,10 @@ class Settings extends Component {
             <Slider min={1} max={30} marks={{1: '1', 15: '15', 30: '30'}}/>
           </Form.Item>
 
+          <Form.Item label='Dias sintomas' name='infectionSymptomDays'>
+            <Slider min={1} max={30} range marks={{1: '1', 15: '15', 30: '30'}}/>
+          </Form.Item>
+
           <Form.Item label='Letalidade' name='infectionLethality'>
             <Slider step={0.1} marks={{0: '0%', 50: '50%', 100: '100%'}}/>
           </Form.Item>
@@ -49,6 +54,9 @@ class Settings extends Component {
           </Form.Item>
 
           <Form.Item wrapperCol={{span: 24}}>
+            <Button type='primary' icon={<ReloadOutlined />} htmlType='submit' style={{marginRight: '10px'}}>
+              Reiniciar
+            </Button>
             {
               this.props.running ? (
                 <Button type='primary' icon={<PauseCircleFilled />} onClick={() => this.props.onPlay(false, null)}>

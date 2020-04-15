@@ -20,19 +20,21 @@ class App extends React.Component {
 
     this.state = {
       settings: {
-        number: 10,
+        number: 100,
         infectionRadius: 4,
         infectionProb: 20,
-        infectionLethality: 3,
+        infectionLethality: 5,
         infectionDays: 15,
-        speed: 1.0
+        infectionSymptomDays: [5, 20],
+        speed: 2.0,
+        count: 0
       },
       running: false
     }
   }
 
   onFormSubmitted = (values) => {
-    this.setState({running: false, settings: {...values}});
+    this.setState({running: false, settings: {...values, count: this.state.settings.count + 1}});
     setTimeout(() => {
       this.setState({running: true})
     }, 100);

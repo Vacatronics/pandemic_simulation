@@ -1,18 +1,13 @@
 import React from 'react'
 import { Circle } from 'react-konva'
+import { HEALTH_HELPERS } from '../_helpers';
 
 /**
  * 
  * @param {*} props 
  */
 const Particle = (props) => {
-    const colors = {
-        normal: 'blue',
-        infected: 'red',
-        recovered: 'gray',
-        dead: 'yellow'
-    }
-    let color = colors[props.health] || 'gray';
+    let color = HEALTH_HELPERS[props.health].color;
     return (
       <Circle {...props} strokeWidth={1} stroke={color}/>
     )

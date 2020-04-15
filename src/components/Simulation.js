@@ -53,9 +53,10 @@ class Simulation extends Component {
           x: this.randomRange(x0 + 2 * radius, x1 - 2 * radius),
           y: this.randomRange(y0 + 2 * radius, y1 - 2 * radius),
           radius: radius,
-          health: i === 0 ? 'infected' : 'normal',
+          health: i === 0 ? 'symptoms_none' : 'normal',
           speedX: this.randomRange(settings.speed * (-1), settings.speed),
-          speedY: this.randomRange(settings.speed * (-1), settings.speed)
+          speedY: this.randomRange(settings.speed * (-1), settings.speed),
+          contagious: i === 0
         }
         return new ParticleHelper(p)
       }
@@ -71,7 +72,7 @@ class Simulation extends Component {
     /* Create new particles based on previous position */
     this.state.particles.forEach(part => {
       part.updatePosition(limits);
-      if (part.health === 'infected') {
+      if (part.contagious) {
         this.infectParticles(part, this.state.particles);
       }
       part.updateHealth(this.state.simulationDay, this.props.settings);
