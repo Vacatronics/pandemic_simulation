@@ -21,7 +21,7 @@ class Simulation extends Component {
       offset: 10,
       radius: 4,
       width: 700,
-      height: window.innerHeight - 150,
+      height: window.innerHeight - 200,
       x: 0,
       y: 0,
       simulationDay: 0,
